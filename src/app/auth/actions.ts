@@ -2,15 +2,16 @@
 'use server';
 
 import { firebaseConfig } from '@/lib/firebase';
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { z } from 'zod';
 
+// This function ensures a single Firebase app instance is used server-side.
 function getFirebaseApp() {
-    if (getApps().length) {
-        return getApp();
+    if (!getApps().length) {
+        return initializeApp(firebaseConfig);
     }
-    return initializeApp(firebaseConfig);
+    return getApp();
 }
 
 const emailSchema = z.string().email({ message: "Invalid email address." });
@@ -36,13 +37,14 @@ export async function signup(prevState: any, formData: FormData) {
     await createUserWithEmailAndPassword(auth, email, password);
     return { message: "User registered successfully!", success: true };
   } catch (e: any) {
-    // It's better to return a generic error message to the user
-    // and log the specific error on the server for security.
-    console.error(e);
+    console.error('Firebase Signup Error:', e);
     if (e.code === 'auth/email-already-in-use') {
         return { message: 'This email is already in use.' };
     }
-    return { message: 'An unexpected error occurred. Please try again.' };
+    if (e.code === 'auth/configuration-not-found') {
+        return { message: 'Firebase configuration error. Please contact support.' };
+    }
+    return { message: 'An unexpected error occurred during registration. Please try again.' };
   }
 }
 
@@ -66,10 +68,13 @@ export async function login(prevState: any, formData: FormData) {
         await signInWithEmailAndPassword(auth, email, password);
         return { message: "Logged in successfully!", success: true };
     } catch (e: any) {
-        console.error(e);
+        console.error('Firebase Login Error:', e);
         if (e.code === 'auth/invalid-credential') {
              return { message: 'Invalid email or password.' };
         }
-        return { message: 'An unexpected error occurred. Please try again.' };
+        if (e.code === 'auth/configuration-not-found') {
+             return { message: 'Firebase configuration error. Please contact support.' };
+        }
+        return { message: 'An unexpected error occurred during login. Please try again.' };
     }
 }
