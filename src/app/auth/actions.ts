@@ -2,12 +2,15 @@
 'use server';
 
 import { firebaseConfig } from '@/lib/firebase';
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { z } from 'zod';
 
-function getFirebaseApp() {
-    return !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
 }
 
 const emailSchema = z.string().email({ message: "Invalid email address." });
@@ -28,7 +31,6 @@ export async function signup(prevState: any, formData: FormData) {
   }
 
   try {
-    const app = getFirebaseApp();
     const auth = getAuth(app);
     await createUserWithEmailAndPassword(auth, email, password);
     return { message: "User registered successfully!", success: true };
@@ -52,7 +54,6 @@ export async function login(prevState: any, formData: FormData) {
     }
 
     try {
-        const app = getFirebaseApp();
         const auth = getAuth(app);
         await signInWithEmailAndPassword(auth, email, password);
         return { message: "Logged in successfully!", success: true };
