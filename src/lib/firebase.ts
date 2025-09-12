@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   projectId: "studio-7182137680-2f186",
   appId: "1:768557266209:web:d913222dfe8e581e647a60",
   storageBucket: "studio-7182137680-2f186.firebasestorage.app",

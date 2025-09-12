@@ -1,9 +1,12 @@
 
 'use server';
 
-import { app } from '@/lib/firebase';
+import { firebaseConfig } from '@/lib/firebase';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { z } from 'zod';
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const emailSchema = z.string().email({ message: "Invalid email address." });
 const passwordSchema = z.string().min(6, { message: "Password must be at least 6 characters long." });
