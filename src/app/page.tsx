@@ -65,7 +65,7 @@ export default function Home() {
             <Scorecard result={result} image={imagePreview} />
           ) : (
             <Card className="flex items-center justify-center h-full min-h-[400px] border-dashed">
-              <CardContent className="text-center text-muted-foreground p-6">
+              <CardContent className="p-6 text-center text-muted-foreground">
                 <p className="text-lg font-medium">Results will be displayed here</p>
                 <p>Upload an image to start the analysis.</p>
               </CardContent>

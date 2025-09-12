@@ -49,7 +49,7 @@ export function Scorecard({ result, image }: ScorecardProps) {
         <p className="text-sm text-muted-foreground">{new Date().toLocaleDateString()}</p>
       </div>
 
-      <CardHeader className="flex flex-row items-center justify-between no-print">
+      <CardHeader className="flex flex-row items-center justify-between no-print p-6">
         <div>
           <CardTitle>Analysis Results</CardTitle>
           <CardDescription>ATC Score and extracted traits.</CardDescription>
@@ -60,12 +60,12 @@ export function Scorecard({ result, image }: ScorecardProps) {
         </Button>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
                 <h3 className="font-semibold text-lg md:hidden">Animal Image</h3>
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                    <Image src={image} alt="Analyzed animal" layout="fill" objectFit="contain" />
+                    <Image src={image} alt="Analyzed animal" fill objectFit="contain" />
                 </div>
             </div>
             <div className="space-y-4">
