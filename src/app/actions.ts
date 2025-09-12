@@ -1,0 +1,35 @@
+'use server';
+
+import {
+  extractAnimalTraitsFromImage,
+  ExtractAnimalTraitsFromImageOutput,
+} from '@/ai/flows/extract-animal-traits-from-image';
+import {
+  automateATCScoreGeneration,
+  AutomateATCScoreGenerationOutput,
+} from '@/ai/flows/automate-atc-score-generation';
+
+export type AtcScoreResult = ExtractAnimalTraitsFromImageOutput & AutomateATCScoreGenerationOutput;
+
+export async function getAtcScore(
+  imageDataUri: string
+): Promise<AtcScoreResult> {
+  try {
+    const extractedTraits = await extractAnimalTraitsFromImage({
+      photoDataUri: imageDataUri,
+    });
+
+    const atcScore = await automateATCScoreGeneration({
+      ...extractedTraits,
+      image: imageDataUri,
+    });
+    
+    return {
+      ...extractedTraits,
+      ...atcScore,
+    };
+  } catch (error) {
+    console.error('Error in ATC score generation flow:', error);
+    throw new Error('Failed to generate ATC score.');
+  }
+}
