@@ -6,11 +6,11 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { z } from 'zod';
 
-let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+function getFirebaseApp() {
+    if (getApps().length) {
+        return getApp();
+    }
+    return initializeApp(firebaseConfig);
 }
 
 const emailSchema = z.string().email({ message: "Invalid email address." });
@@ -31,11 +31,18 @@ export async function signup(prevState: any, formData: FormData) {
   }
 
   try {
+    const app = getFirebaseApp();
     const auth = getAuth(app);
     await createUserWithEmailAndPassword(auth, email, password);
     return { message: "User registered successfully!", success: true };
   } catch (e: any) {
-    return { message: e.message };
+    // It's better to return a generic error message to the user
+    // and log the specific error on the server for security.
+    console.error(e);
+    if (e.code === 'auth/email-already-in-use') {
+        return { message: 'This email is already in use.' };
+    }
+    return { message: 'An unexpected error occurred. Please try again.' };
   }
 }
 
@@ -54,10 +61,15 @@ export async function login(prevState: any, formData: FormData) {
     }
 
     try {
+        const app = getFirebaseApp();
         const auth = getAuth(app);
         await signInWithEmailAndPassword(auth, email, password);
         return { message: "Logged in successfully!", success: true };
     } catch (e: any) {
-        return { message: e.message };
+        console.error(e);
+        if (e.code === 'auth/invalid-credential') {
+             return { message: 'Invalid email or password.' };
+        }
+        return { message: 'An unexpected error occurred. Please try again.' };
     }
 }
