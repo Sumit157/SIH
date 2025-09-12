@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,7 +17,6 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { login } from '@/app/auth/actions';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const initialState = {
@@ -35,7 +35,7 @@ function SubmitButton() {
 }
 
 export default function LoginPage() {
-  const [state, formAction] = useFormState(login, initialState);
+  const [state, formAction] = useActionState(login, initialState);
   const { toast } = useToast();
   const router = useRouter();
 
