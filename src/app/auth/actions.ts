@@ -8,10 +8,10 @@ import { z } from 'zod';
 
 // This function ensures a single Firebase app instance is used server-side.
 function getFirebaseApp() {
-    if (!getApps().length) {
-        return initializeApp(firebaseConfig);
+    if (getApps().length > 0) {
+        return getApp();
     }
-    return getApp();
+    return initializeApp(firebaseConfig);
 }
 
 const emailSchema = z.string().email({ message: "Invalid email address." });
@@ -41,7 +41,7 @@ export async function signup(prevState: any, formData: FormData) {
     if (e.code === 'auth/email-already-in-use') {
         return { message: 'This email is already in use.' };
     }
-    if (e.code === 'auth/configuration-not-found') {
+    if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/unauthorized-domain' || e.code === 'auth/configuration-not-found') {
         return { message: 'Firebase configuration error. Please contact support.' };
     }
     return { message: 'An unexpected error occurred during registration. Please try again.' };
@@ -72,7 +72,7 @@ export async function login(prevState: any, formData: FormData) {
         if (e.code === 'auth/invalid-credential') {
              return { message: 'Invalid email or password.' };
         }
-        if (e.code === 'auth/configuration-not-found') {
+        if (e.code === 'auth/operation-not-allowed' || e.code === 'auth/unauthorized-domain' || e.code === 'auth/configuration-not-found') {
              return { message: 'Firebase configuration error. Please contact support.' };
         }
         return { message: 'An unexpected error occurred during login. Please try again.' };

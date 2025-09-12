@@ -10,7 +10,7 @@ export const firebaseConfig = {
   messagingSenderId: "768557266209"
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase for client-side usage
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export { app };
