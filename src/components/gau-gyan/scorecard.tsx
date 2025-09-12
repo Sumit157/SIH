@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -14,7 +15,7 @@ interface ScorecardProps {
   image: string;
 }
 
-const traitLabels: Record<keyof Omit<AtcScoreResult, 'atcScore' | 'salientTraits'>, string> = {
+const traitLabels: Record<keyof Omit<AtcScoreResult, 'atcScore' | 'salientTraits' | 'breed' | 'breedingSuitability'>, string> = {
     bodyLength: "Body Length",
     chestWidth: "Chest Width",
     heightAtWithers: "Height at Withers",
@@ -75,6 +76,14 @@ export function Scorecard({ result, image }: ScorecardProps) {
                   <h3 className="font-semibold text-lg mb-2">Salient Traits</h3>
                   <p className="text-sm text-muted-foreground">{result.salientTraits}</p>
                 </div>
+                <div>
+                    <h3 className="font-semibold text-lg mb-2">Breed</h3>
+                    <p className="text-sm text-muted-foreground">{result.breed}</p>
+                </div>
+                 <div>
+                    <h3 className="font-semibold text-lg mb-2">Breeding Suitability</h3>
+                    <p className="text-sm text-muted-foreground">{result.breedingSuitability}</p>
+                </div>
             </div>
         </div>
         
@@ -82,11 +91,12 @@ export function Scorecard({ result, image }: ScorecardProps) {
           <h3 className="font-semibold text-lg mb-4">Extracted Traits</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {Object.entries(result).map(([key, value]) => {
-              if (traitLabels[key as keyof typeof traitLabels]) {
+              const label = traitLabels[key as keyof typeof traitLabels];
+              if (label) {
                 return (
                   <Card key={key}>
                     <CardHeader className="p-4">
-                      <CardDescription>{traitLabels[key as keyof typeof traitLabels]}</CardDescription>
+                      <CardDescription>{label}</CardDescription>
                       <CardTitle className="text-2xl">
                         {value}
                         <span className="text-sm text-muted-foreground ml-1">

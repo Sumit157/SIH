@@ -1,3 +1,4 @@
+
 'use server';
 
 import {
@@ -20,7 +21,11 @@ export async function getAtcScore(
     });
 
     const atcScore = await automateATCScoreGeneration({
-      ...extractedTraits,
+      bodyLength: extractedTraits.bodyLength,
+      chestWidth: extractedTraits.chestWidth,
+      heightAtWithers: extractedTraits.heightAtWithers,
+      rumpAngle: extractedTraits.rumpAngle,
+      udderShape: extractedTraits.udderShape,
       image: imageDataUri,
     });
     

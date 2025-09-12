@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that extracts animal traits from an image.
@@ -29,6 +30,8 @@ const ExtractAnimalTraitsFromImageOutputSchema = z.object({
     .describe('The height at withers of the animal in cm.'),
   rumpAngle: z.number().describe('The rump angle of the animal in degrees.'),
   udderShape: z.string().describe('The shape of the udder.'),
+  breed: z.string().describe('The breed of the animal (e.g., Holstein, Jersey, Gir).'),
+  breedingSuitability: z.string().describe('A brief assessment of the animal\'s suitability for breeding purposes.'),
 });
 export type ExtractAnimalTraitsFromImageOutput = z.infer<
   typeof ExtractAnimalTraitsFromImageOutputSchema
@@ -55,10 +58,14 @@ Analyze the animal in the photo and extract the following traits:
 - Height at Withers (cm)
 - Rump Angle (degrees)
 - Udder Shape
+- Breed
+- Breeding Suitability
 
 Photo: {{media url=photoDataUri}}
 
-Ensure that the measurements are as accurate as possible, and provide the udder shape as a descriptive string (e.g., \'bowl shaped\', \'pendulous\'). Return measurements in cm and degrees.`, // prettier-ignore
+Ensure that the measurements are as accurate as possible, and provide the udder shape as a descriptive string (e.g., 'bowl shaped', 'pendulous'). 
+Also, identify the breed of the animal and provide a short assessment of its suitability for breeding based on its physical characteristics.
+Return measurements in cm and degrees.`, // prettier-ignore
 });
 
 const extractAnimalTraitsFromImageFlow = ai.defineFlow(
