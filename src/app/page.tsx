@@ -1,6 +1,10 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { app } from '@/lib/firebase';
 import { Card, CardContent } from '@/components/ui/card';
 import { UploadForm } from '@/components/gau-gyan/upload-form';
 import { Scorecard } from '@/components/gau-gyan/scorecard';
@@ -9,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import Loading from './loading';
 
 export default function Home() {
   const [result, setResult] = useState<AtcScoreResult | null>(null);
@@ -16,6 +21,23 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        router.push('/login');
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleAnalyze = async (imageDataUri: string) => {
     setIsLoading(true);
@@ -97,6 +119,14 @@ export default function Home() {
          </CardContent>
        </Card>
     );
+  }
+
+  if (authLoading) {
+    return <Loading />;
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (

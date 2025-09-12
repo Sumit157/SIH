@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { login } from '@/app/auth/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const initialState = {
   message: "",
@@ -36,6 +37,7 @@ function SubmitButton() {
 export default function LoginPage() {
   const [state, formAction] = useFormState(login, initialState);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (state.message && !state.success) {
@@ -50,8 +52,9 @@ export default function LoginPage() {
             title: "Success",
             description: state.message,
         });
+        router.push('/');
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)]">
