@@ -44,6 +44,7 @@ const prompt = ai.definePrompt({
   name: 'extractAnimalTraitsFromImagePrompt',
   input: {schema: ExtractAnimalTraitsFromImageInputSchema},
   output: {schema: ExtractAnimalTraitsFromImageOutputSchema},
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are an expert in animal husbandry, with a deep understanding of animal anatomy and trait measurement.
 
 You will use the provided image to identify and measure key body parameters of the animal.
@@ -68,6 +69,9 @@ const extractAnimalTraitsFromImageFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('The model did not return a response.');
+    }
+    return output;
   }
 );

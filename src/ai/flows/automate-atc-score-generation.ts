@@ -45,6 +45,7 @@ const atcScorePrompt = ai.definePrompt({
   name: 'atcScorePrompt',
   input: {schema: AutomateATCScoreGenerationInputSchema},
   output: {schema: AutomateATCScoreGenerationOutputSchema},
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are an AI assistant specialized in evaluating animal body structures for dairy farming. You are part of the Rashtriya Gokul Mission. Given the following measurements and characteristics of a cattle or buffalo, generate an ATC (Animal Type Classification) score and list salient traits.
 
   Body Length: {{bodyLength}} cm
@@ -68,6 +69,9 @@ const automateATCScoreGenerationFlow = ai.defineFlow(
   async input => {
     // Call the prompt to generate the ATC score and salient traits
     const {output} = await atcScorePrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('The model did not return a response.');
+    }
+    return output;
   }
 );
