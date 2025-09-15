@@ -2,7 +2,7 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { loginUser } from '@/app/auth/actions';
+import { loginUser } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,7 @@ export default function LoginPage() {
         description: 'Welcome back!',
       });
       router.push('/');
+      router.refresh(); // Force a refresh to update user state in header
     }
   }, [state, toast, router]);
 

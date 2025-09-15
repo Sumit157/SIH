@@ -1,6 +1,6 @@
 
 import { initializeApp, getApps, getApp, App } from 'firebase/app';
-import * as admin from 'firebase-admin';
+import { getAuth } from 'firebase/auth';
 
 // CLIENT-SIDE CONFIG
 const firebaseConfig = {
@@ -12,24 +12,9 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase app (client-side)
 const app: App = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
 
 
-// SERVER-SIDE/ADMIN CONFIG
-let adminApp: admin.app.App;
-
-if (!admin.apps.length) {
-    const serviceAccount: admin.ServiceAccount = {
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    };
-    adminApp = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-    });
-} else {
-    adminApp = admin.app();
-}
-
-
-export { app, adminApp };
+export { app, auth };

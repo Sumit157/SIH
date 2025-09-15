@@ -5,14 +5,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { UploadForm } from '@/components/gau-gyan/upload-form';
 import { Scorecard } from '@/components/gau-gyan/scorecard';
-import { type AtcScoreResult, getAtcScore, addHistory, getHistory } from '@/app/actions';
+import { type AtcScoreResult, getAtcScore, getHistory } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Info } from 'lucide-react';
 import { HistoryCard } from '@/components/gau-gyan/history-card';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { app } from '@/lib/firebase';
+import { useUser } from '@/hooks/use-user';
 
 
 export type HistoryItem = AtcScoreResult & {
@@ -27,26 +26,27 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useUser();
   const { toast } = useToast();
 
   useEffect(() => {
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
+    if (user) {
+      const fetchHistory = async () => {
         try {
           const userHistory = await getHistory();
           setHistory(userHistory);
         } catch (e) {
-          console.error("Failed to load history from Firestore", e);
+          console.error("Failed to load history", e);
+          // Don't show a toast for this, as it can be noisy on first load
         }
-      } else {
-        setHistory([]);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+      };
+      fetchHistory();
+    } else {
+      setHistory([]);
+      setResult(null);
+      setImagePreview(null);
+    }
+  }, [user]);
 
   const handleAnalyze = async (imageDataUri: string) => {
     if (!user) {
@@ -68,16 +68,10 @@ export default function Home() {
       }
       setResult(analysisResult);
       
-      const newHistoryItem: HistoryItem = {
-        ...analysisResult,
-        id: new Date().toISOString(),
-        image: imageDataUri,
-        timestamp: new Date().toLocaleString(),
-      };
-
-      await addHistory(newHistoryItem);
-      const updatedHistory = [newHistoryItem, ...history];
+      // After a successful analysis, refresh the history
+      const updatedHistory = await getHistory();
       setHistory(updatedHistory);
+
 
     } catch (e) {
       console.error(e);
