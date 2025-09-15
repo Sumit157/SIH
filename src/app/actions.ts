@@ -25,15 +25,16 @@ function getAdminApp(): admin.app.App {
         return adminApp;
     }
 
+    // This is the recommended way to initialize in a serverless environment
+    if (admin.apps.length > 0) {
+        adminApp = admin.app();
+        return adminApp;
+    }
+
     const hasRequiredEnvVars = !!(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL);
 
     if (!hasRequiredEnvVars) {
         throw new Error('Firebase Admin environment variables are not set. Please set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL in your .env.local file.');
-    }
-
-    if (admin.apps.length > 0) {
-        adminApp = admin.app();
-        return adminApp;
     }
 
     const serviceAccount: admin.ServiceAccount = {
