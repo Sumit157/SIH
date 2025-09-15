@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { UploadForm } from '@/components/gau-gyan/upload-form';
 import { Scorecard } from '@/components/gau-gyan/scorecard';
@@ -10,14 +10,32 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
-import Loading from './loading';
+import { HistoryCard } from '@/components/gau-gyan/history-card';
+
+export type HistoryItem = AtcScoreResult & {
+  id: string;
+  image: string;
+  timestamp: string;
+};
 
 export default function Home() {
   const [result, setResult] = useState<AtcScoreResult | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      const savedHistory = localStorage.getItem('gauGyanHistory');
+      if (savedHistory) {
+        setHistory(JSON.parse(savedHistory));
+      }
+    } catch (e) {
+      console.error("Failed to load history from localStorage", e);
+    }
+  }, []);
 
   const handleAnalyze = async (imageDataUri: string) => {
     setIsLoading(true);
@@ -29,6 +47,18 @@ export default function Home() {
         throw new Error('Analysis failed to return complete data.');
       }
       setResult(analysisResult);
+      
+      const newHistoryItem: HistoryItem = {
+        ...analysisResult,
+        id: new Date().toISOString(),
+        image: imageDataUri,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      const updatedHistory = [newHistoryItem, ...history];
+      setHistory(updatedHistory);
+      localStorage.setItem('gauGyanHistory', JSON.stringify(updatedHistory));
+
     } catch (e) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
@@ -49,8 +79,23 @@ export default function Home() {
     setError(null);
   }
 
+  const handleClearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('gauGyanHistory');
+    toast({
+        title: 'History Cleared',
+        description: 'Your analysis history has been removed.',
+    });
+  }
+
+  const handleSelectFromHistory = (item: HistoryItem) => {
+    setImagePreview(item.image);
+    setResult(item);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoading && !result) {
        return (
         <Card>
           <CardContent className="p-6">
@@ -104,8 +149,9 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <UploadForm onAnalyze={handleAnalyze} imagePreview={imagePreview} setImagePreview={setImagePreview} isLoading={isLoading} hasResult={!!result} onNewAnalysis={handleNewAnalysis} />
+          <HistoryCard history={history} onClearHistory={handleClearHistory} onSelectHistoryItem={handleSelectFromHistory} />
         </div>
         <div className="lg:col-span-3">
           {renderContent()}
@@ -114,3 +160,4 @@ export default function Home() {
     </div>
   );
 }
+
