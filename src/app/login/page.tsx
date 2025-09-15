@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react';
 import { loginUser } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -26,7 +26,7 @@ function SubmitButton() {
 }
 
 export default function LoginPage() {
-  const [state, formAction] = useFormState(loginUser, null);
+  const [state, formAction] = useActionState(loginUser, null);
   const { toast } = useToast();
   const router = useRouter();
 

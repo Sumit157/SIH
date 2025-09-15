@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react';
 import { registerUser } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -25,7 +25,7 @@ function SubmitButton() {
 }
 
 export default function RegisterPage() {
-  const [state, formAction] = useFormState(registerUser, null);
+  const [state, formAction] = useActionState(registerUser, null);
   const { toast } = useToast();
   const router = useRouter();
 
