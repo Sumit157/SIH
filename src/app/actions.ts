@@ -37,14 +37,24 @@ if (!admin.apps.length) {
 export async function registerUser(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const name = formData.get('name') as string;
 
-  if (!email || !password) {
-    return { message: 'Email and password are required.' };
+  if (!email || !password || !name) {
+    return { message: 'Name, email, and password are required.' };
   }
 
   try {
     const auth = getAuth(adminApp);
-    await auth.createUser({email, password});
+    const userRecord = await auth.createUser({
+        email, 
+        password,
+        displayName: name,
+    });
+    
+    // You could also create a document in Firestore here to store more user details
+    // const db = getFirestore(adminApp);
+    // await db.collection('users').doc(userRecord.uid).set({ name, email });
+
     return { message: 'Registration successful! Please log in.', success: true };
   } catch (error: any) {
     console.error('Registration error:', error);
@@ -191,3 +201,4 @@ export async function getAtcScore(
 
     return result;
 }
+

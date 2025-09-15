@@ -45,7 +45,7 @@ export default function AppHeader() {
           {!loading && (
             user ? (
               <>
-                <p className="text-sm text-muted-foreground hidden sm:block">Welcome, {user.email}</p>
+                <p className="text-sm text-muted-foreground hidden sm:block">Welcome, {user.displayName || user.email}</p>
                 <Button variant="outline" onClick={handleLogout}>Logout</Button>
               </>
             ) : (
