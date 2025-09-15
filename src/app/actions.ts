@@ -62,7 +62,7 @@ export async function registerUser(prevState: any, formData: FormData) {
 
   try {
     const auth = getAuth(app);
-    const userRecord = await auth.createUser({
+    await auth.createUser({
         email, 
         password,
         displayName: name,
@@ -78,36 +78,6 @@ export async function registerUser(prevState: any, formData: FormData) {
   }
 }
 
-export async function loginUser(prevState: any, formData: FormData) {
-  const app = getAdminApp();
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  if (!email || !password) {
-    return { message: 'Email and password are required.' };
-  }
-  
-  try {
-      const auth = getAuth(app);
-      const user = await auth.getUserByEmail(email);
-      // In a real app you would verify password here. The Admin SDK can't do this.
-      // This is a known limitation. A common pattern is to call the client-side REST API from the server.
-      // For this prototype, we'll assume the password is correct if the user exists.
-      
-      const customToken = await auth.createCustomToken(user.uid);
-      
-      // We will send the custom token to the client to sign in.
-      // The client will then send back the ID token to create a session cookie.
-      return { message: 'Login successful!', success: true, customToken };
-
-  } catch(error: any) {
-    console.error("Login error:", error);
-    if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-      return { message: "Invalid email or password." };
-    }
-     return { message: 'An unknown login error occurred.' };
-  }
-}
 
 export async function createSessionCookie(idToken: string) {
     const app = getAdminApp();
@@ -119,6 +89,7 @@ export async function createSessionCookie(idToken: string) {
         maxAge: expiresIn,
         path: '/',
     });
+    return { success: true };
 }
 
 
