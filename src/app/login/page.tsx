@@ -3,7 +3,7 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { loginUser } from '@/app/actions';
+import { loginUser, createSessionCookie } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 
 function SubmitButton() {
@@ -32,13 +34,29 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (state?.success) {
-      toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
-      });
-      router.push('/');
-      router.refresh(); // Force a refresh to update user state in header
+    if (state?.success && state.customToken) {
+      const handleLogin = async () => {
+        try {
+          const userCredential = await signInWithCustomToken(auth, state.customToken!);
+          const idToken = await userCredential.user.getIdToken();
+          await createSessionCookie(idToken);
+          
+          toast({
+            title: 'Login Successful',
+            description: 'Welcome back!',
+          });
+          router.push('/');
+          router.refresh();
+        } catch (error) {
+          console.error("Firebase sign in error", error);
+          toast({
+            variant: "destructive",
+            title: 'Login Failed',
+            description: 'Could not complete sign in process.',
+          });
+        }
+      }
+      handleLogin();
     }
   }, [state, toast, router]);
 

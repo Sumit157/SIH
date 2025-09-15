@@ -18,16 +18,11 @@ import {
 
 
 // SERVER-SIDE/ADMIN CONFIG
-let adminApp: admin.app.App;
+let adminApp: admin.app.App | null = null;
 
-const hasRequiredEnvVars = process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL;
+const hasRequiredEnvVars = !!(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL);
 
-if (!admin.apps.length) {
-    if (!hasRequiredEnvVars) {
-        throw new Error(
-            'Firebase Admin environment variables are not set. Please set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL in your .env.local file.'
-        );
-    }
+if (hasRequiredEnvVars && !admin.apps.length) {
     const serviceAccount: admin.ServiceAccount = {
         projectId: process.env.FIREBASE_PROJECT_ID,
         privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
@@ -36,12 +31,22 @@ if (!admin.apps.length) {
     adminApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
     });
-} else {
+} else if (admin.apps.length) {
     adminApp = admin.app();
+}
+
+function ensureAdminApp() {
+    if (!adminApp) {
+        throw new Error(
+            'Firebase Admin environment variables are not set. Please set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL in your .env.local file.'
+        );
+    }
+    return adminApp;
 }
 
 
 export async function registerUser(prevState: any, formData: FormData) {
+  const app = ensureAdminApp();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
@@ -51,16 +56,12 @@ export async function registerUser(prevState: any, formData: FormData) {
   }
 
   try {
-    const auth = getAuth(adminApp);
+    const auth = getAuth(app);
     const userRecord = await auth.createUser({
         email, 
         password,
         displayName: name,
     });
-    
-    // You could also create a document in Firestore here to store more user details
-    // const db = getFirestore(adminApp);
-    // await db.collection('users').doc(userRecord.uid).set({ name, email });
 
     return { message: 'Registration successful! Please log in.', success: true };
   } catch (error: any) {
@@ -73,33 +74,26 @@ export async function registerUser(prevState: any, formData: FormData) {
 }
 
 export async function loginUser(prevState: any, formData: FormData) {
+  const app = ensureAdminApp();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
   if (!email || !password) {
     return { message: 'Email and password are required.' };
   }
-  // This is a placeholder for a real login flow with email/password using Firebase Admin SDK
-  // The Admin SDK doesn't directly sign in users like the client SDK.
-  // A proper implementation would involve creating a custom token and sending it to the client.
-  // For this prototype, we'll simulate a login by verifying the user exists and setting a session cookie.
+  
   try {
-      const auth = getAuth(adminApp);
+      const auth = getAuth(app);
       const user = await auth.getUserByEmail(email);
-      // In a real app, you would verify the password here. The Admin SDK does not provide a direct way to do this.
-      // This is a known limitation. A common pattern is to call the client-side signInWithEmailAndPassword REST API from the server.
-      // For the prototype's purpose, we'll assume the password is correct if the user exists.
+      // In a real app you would verify password here. The Admin SDK can't do this.
+      // This is a known limitation. A common pattern is to call the client-side REST API from the server.
+      // For this prototype, we'll assume the password is correct if the user exists.
       
-      // The intended flow is: server creates custom token -> client receives token -> client calls signInWithCustomToken() -> client gets ID token -> client sends ID token to server -> server creates session cookie.
-      const sessionCookie = await auth.createSessionCookie(user.uid, { expiresIn: 60 * 60 * 24 * 5 * 1000 });
+      const customToken = await auth.createCustomToken(user.uid);
       
-      cookies().set('session', sessionCookie, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 60 * 60 * 24 * 5, // 5 days
-          path: '/',
-      });
-      return { message: 'Login successful!', success: true };
+      // We will send the custom token to the client to sign in.
+      // The client will then send back the ID token to create a session cookie.
+      return { message: 'Login successful!', success: true, customToken };
 
   } catch(error: any) {
     console.error("Login error:", error);
@@ -109,6 +103,19 @@ export async function loginUser(prevState: any, formData: FormData) {
      return { message: 'An unknown login error occurred.' };
   }
 }
+
+export async function createSessionCookie(idToken: string) {
+    const app = ensureAdminApp();
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+    const sessionCookie = await getAuth(app).createSessionCookie(idToken, { expiresIn });
+    cookies().set('session', sessionCookie, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: expiresIn,
+        path: '/',
+    });
+}
+
 
 export async function logoutUser() {
     cookies().delete('session');
@@ -120,7 +127,8 @@ async function getUserIdFromSession(): Promise<string | null> {
         return null;
     }
     try {
-        const decodedToken = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
+        const app = ensureAdminApp();
+        const decodedToken = await getAuth(app).verifySessionCookie(sessionCookie, true);
         return decodedToken.uid;
     } catch (error) {
         console.error("Auth error in getUserIdFromSession", error);
@@ -130,12 +138,13 @@ async function getUserIdFromSession(): Promise<string | null> {
 
 
 export async function getHistory(): Promise<HistoryItem[]> {
+    const app = ensureAdminApp();
     const userId = await getUserIdFromSession();
     if (!userId) {
       throw new Error('Not authenticated');
     }
     
-    const db = getFirestore(adminApp);
+    const db = getFirestore(app);
     const historyCollection = collection(db, 'users', userId, 'history');
     const q = query(historyCollection);
     const querySnapshot = await getDocs(q);
@@ -154,12 +163,13 @@ export async function getHistory(): Promise<HistoryItem[]> {
 }
 
 export async function addHistory(item: Omit<HistoryItem, 'id' | 'timestamp'>) {
+    const app = ensureAdminApp();
     const userId = await getUserIdFromSession();
     if (!userId) {
         throw new Error('Not authenticated');
     }
 
-    const db = getFirestore(adminApp);
+    const db = getFirestore(app);
     const historyCollection = collection(db, 'users', userId, 'history');
     
     const { image, ...dataToStore } = item;
@@ -208,7 +218,3 @@ export async function getAtcScore(
 
     return result;
 }
-
-
-
-
