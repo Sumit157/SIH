@@ -9,8 +9,11 @@ import { type AtcScoreResult, getAtcScore } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 import { HistoryCard } from '@/components/gau-gyan/history-card';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { app } from '@/lib/firebase';
+import { addHistory, getHistory } from './auth/actions';
 
 export type HistoryItem = AtcScoreResult & {
   id: string;
@@ -24,20 +27,37 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    try {
-      const savedHistory = localStorage.getItem('gauGyanHistory');
-      if (savedHistory) {
-        setHistory(JSON.parse(savedHistory));
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      if (user) {
+        try {
+          const userHistory = await getHistory();
+          setHistory(userHistory);
+        } catch (e) {
+          console.error("Failed to load history from Firestore", e);
+        }
+      } else {
+        setHistory([]);
       }
-    } catch (e) {
-      console.error("Failed to load history from localStorage", e);
-    }
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleAnalyze = async (imageDataUri: string) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'You must be logged in to analyze an image.',
+      });
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
     setError(null);
@@ -55,9 +75,9 @@ export default function Home() {
         timestamp: new Date().toLocaleString(),
       };
 
+      await addHistory(newHistoryItem);
       const updatedHistory = [newHistoryItem, ...history];
       setHistory(updatedHistory);
-      localStorage.setItem('gauGyanHistory', JSON.stringify(updatedHistory));
 
     } catch (e) {
       console.error(e);
@@ -79,12 +99,14 @@ export default function Home() {
     setError(null);
   }
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
+     if (!user) return;
+    // This would require a backend action to delete user's history from firestore
+    // For now, we just clear it from the state
     setHistory([]);
-    localStorage.removeItem('gauGyanHistory');
     toast({
         title: 'History Cleared',
-        description: 'Your analysis history has been removed.',
+        description: 'Your analysis history has been cleared from view.',
     });
   }
 
@@ -135,6 +157,22 @@ export default function Home() {
     if (result && imagePreview) {
       return <Scorecard result={result} image={imagePreview} />;
     }
+    
+    if (!user) {
+        return (
+            <Card className="flex items-center justify-center h-full min-h-[400px] border-dashed">
+                <CardContent className="p-6 text-center">
+                   <Alert>
+                     <Info className="h-4 w-4" />
+                     <AlertTitle>Welcome to Gau Gyan!</AlertTitle>
+                     <AlertDescription>
+                       Please log in or create an account to start analyzing and saving your animal classifications.
+                     </AlertDescription>
+                   </Alert>
+                 </CardContent>
+               </Card>
+        )
+    }
 
     return (
        <Card className="flex items-center justify-center h-full min-h-[400px] border-dashed">
@@ -151,7 +189,7 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
         <div className="lg:col-span-2 space-y-8">
           <UploadForm onAnalyze={handleAnalyze} imagePreview={imagePreview} setImagePreview={setImagePreview} isLoading={isLoading} hasResult={!!result} onNewAnalysis={handleNewAnalysis} />
-          <HistoryCard history={history} onClearHistory={handleClearHistory} onSelectHistoryItem={handleSelectFromHistory} />
+          {user && <HistoryCard history={history} onClearHistory={handleClearHistory} onSelectHistoryItem={handleSelectFromHistory} />}
         </div>
         <div className="lg:col-span-3">
           {renderContent()}
@@ -160,4 +198,3 @@ export default function Home() {
     </div>
   );
 }
-

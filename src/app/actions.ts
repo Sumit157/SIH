@@ -9,6 +9,7 @@ import {
   automateATCScoreGeneration,
   AutomateATCScoreGenerationOutput,
 } from '@/ai/flows/automate-atc-score-generation';
+import { cookies } from 'next/headers';
 
 export type AtcScoreResult = ExtractAnimalTraitsFromImageOutput & AutomateATCScoreGenerationOutput;
 
@@ -16,6 +17,11 @@ export async function getAtcScore(
   imageDataUri: string
 ): Promise<AtcScoreResult> {
   try {
+     const session = cookies().get('session')?.value;
+    if (!session) {
+        throw new Error('You must be logged in to perform analysis.');
+    }
+    
     const extractedTraits = await extractAnimalTraitsFromImage({
       photoDataUri: imageDataUri,
     });

@@ -15,10 +15,6 @@ interface HistoryCardProps {
 }
 
 export function HistoryCard({ history, onClearHistory, onSelectHistoryItem }: HistoryCardProps) {
-    if (history.length === 0) {
-        return null;
-    }
-
     return (
         <Card className="no-print">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -26,30 +22,37 @@ export function HistoryCard({ history, onClearHistory, onSelectHistoryItem }: Hi
                     <CardTitle>Analysis History</CardTitle>
                     <CardDescription>Review your past analyses.</CardDescription>
                 </div>
-                <Button variant="ghost" size="icon" onClick={onClearHistory}>
+                {/* <Button variant="ghost" size="icon" onClick={onClearHistory}>
                     <Trash2 className="h-5 w-5" />
                     <span className="sr-only">Clear History</span>
-                </Button>
+                </Button> */}
             </CardHeader>
             <CardContent>
-                <ScrollArea className="h-[400px]">
-                    <div className="space-y-4">
-                        {history.map((item) => (
-                            <div key={item.id} className="flex items-center gap-4 p-2 rounded-md hover:bg-muted/50 cursor-pointer" onClick={() => onSelectHistoryItem(item)}>
-                                <div className="relative h-16 w-16 rounded-md overflow-hidden border">
-                                    <Image src={item.image} alt={`Analyzed animal from ${item.timestamp}`} fill objectFit="cover" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold">ATC Score: {item.atcScore.toFixed(2)}</p>
-                                    <p className="text-sm text-muted-foreground">{item.breed}</p>
-                                    <p className="text-xs text-muted-foreground">{item.timestamp}</p>
-                                </div>
-                            </div>
-                        ))}
+                {history.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                        <History className="mx-auto h-12 w-12" />
+                        <p className="mt-4">No analysis history found.</p>
+                        <p className="text-sm">Your results will appear here after you analyze an image.</p>
                     </div>
-                </ScrollArea>
+                ) : (
+                    <ScrollArea className="h-[400px]">
+                        <div className="space-y-4">
+                            {history.map((item) => (
+                                <div key={item.id} className="flex items-center gap-4 p-2 rounded-md hover:bg-muted/50 cursor-pointer" onClick={() => onSelectHistoryItem(item)}>
+                                    <div className="relative h-16 w-16 rounded-md overflow-hidden border">
+                                        <Image src={item.image} alt={`Analyzed animal from ${item.timestamp}`} fill objectFit="cover" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">ATC Score: {item.atcScore.toFixed(2)}</p>
+                                        <p className="text-sm text-muted-foreground">{item.breed}</p>
+                                        <p className="text-xs text-muted-foreground">{item.timestamp}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
+                )}
             </CardContent>
         </Card>
     );
 }
-
