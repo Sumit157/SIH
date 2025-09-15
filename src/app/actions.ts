@@ -20,33 +20,38 @@ import {
 // SERVER-SIDE/ADMIN CONFIG
 let adminApp: admin.app.App | null = null;
 
-const hasRequiredEnvVars = !!(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL);
+function getAdminApp(): admin.app.App {
+    if (adminApp) {
+        return adminApp;
+    }
 
-if (hasRequiredEnvVars && !admin.apps.length) {
+    const hasRequiredEnvVars = !!(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL);
+
+    if (!hasRequiredEnvVars) {
+        throw new Error('Firebase Admin environment variables are not set. Please set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL in your .env.local file.');
+    }
+
+    if (admin.apps.length > 0) {
+        adminApp = admin.app();
+        return adminApp;
+    }
+
     const serviceAccount: admin.ServiceAccount = {
         projectId: process.env.FIREBASE_PROJECT_ID,
         privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     };
+
     adminApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
     });
-} else if (admin.apps.length) {
-    adminApp = admin.app();
-}
 
-function ensureAdminApp() {
-    if (!adminApp) {
-        throw new Error(
-            'Firebase Admin environment variables are not set. Please set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL in your .env.local file.'
-        );
-    }
     return adminApp;
 }
 
 
 export async function registerUser(prevState: any, formData: FormData) {
-  const app = ensureAdminApp();
+  const app = getAdminApp();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
@@ -74,7 +79,7 @@ export async function registerUser(prevState: any, formData: FormData) {
 }
 
 export async function loginUser(prevState: any, formData: FormData) {
-  const app = ensureAdminApp();
+  const app = getAdminApp();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -105,7 +110,7 @@ export async function loginUser(prevState: any, formData: FormData) {
 }
 
 export async function createSessionCookie(idToken: string) {
-    const app = ensureAdminApp();
+    const app = getAdminApp();
     const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await getAuth(app).createSessionCookie(idToken, { expiresIn });
     cookies().set('session', sessionCookie, {
@@ -127,7 +132,7 @@ async function getUserIdFromSession(): Promise<string | null> {
         return null;
     }
     try {
-        const app = ensureAdminApp();
+        const app = getAdminApp();
         const decodedToken = await getAuth(app).verifySessionCookie(sessionCookie, true);
         return decodedToken.uid;
     } catch (error) {
@@ -138,11 +143,11 @@ async function getUserIdFromSession(): Promise<string | null> {
 
 
 export async function getHistory(): Promise<HistoryItem[]> {
-    const app = ensureAdminApp();
     const userId = await getUserIdFromSession();
     if (!userId) {
       throw new Error('Not authenticated');
     }
+    const app = getAdminApp();
     
     const db = getFirestore(app);
     const historyCollection = collection(db, 'users', userId, 'history');
@@ -163,11 +168,11 @@ export async function getHistory(): Promise<HistoryItem[]> {
 }
 
 export async function addHistory(item: Omit<HistoryItem, 'id' | 'timestamp'>) {
-    const app = ensureAdminApp();
     const userId = await getUserIdFromSession();
     if (!userId) {
         throw new Error('Not authenticated');
     }
+    const app = getAdminApp();
 
     const db = getFirestore(app);
     const historyCollection = collection(db, 'users', userId, 'history');
@@ -191,6 +196,8 @@ export async function getAtcScore(
       throw new Error('You must be logged in to perform analysis.');
     }
     
+    getAdminApp(); // Ensures admin app is initialized before AI flows are called.
+
     const extractedTraits = await extractAnimalTraitsFromImage({
       photoDataUri: imageDataUri,
     });
