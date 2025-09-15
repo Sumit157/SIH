@@ -1,7 +1,5 @@
 
 import { initializeApp, getApps, getApp, App } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 import * as admin from 'firebase-admin';
 
 // CLIENT-SIDE CONFIG
@@ -15,10 +13,9 @@ const firebaseConfig = {
 };
 
 const app: App = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
 
-// SERVER-SIDE/ADMIN CONFIG - MOVED TO actions.ts to avoid client-side bundling issues.
+
+// SERVER-SIDE/ADMIN CONFIG
 let adminApp: admin.app.App;
 
 if (!admin.apps.length) {
@@ -35,4 +32,4 @@ if (!admin.apps.length) {
 }
 
 
-export { app, auth, db, adminApp, firebaseConfig };
+export { app, adminApp };

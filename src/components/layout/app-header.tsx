@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { logoutUser } from '@/app/actions';
 
 
 export default function AppHeader() {
@@ -26,7 +27,9 @@ export default function AppHeader() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await logoutUser();
+      // This will trigger the onAuthStateChanged listener to nullify user
+      await auth.signOut();
       toast({
         title: 'Logged Out',
         description: 'You have been successfully logged out.',

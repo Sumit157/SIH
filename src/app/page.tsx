@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { UploadForm } from '@/components/gau-gyan/upload-form';
 import { Scorecard } from '@/components/gau-gyan/scorecard';
-import { type AtcScoreResult, getAtcScore, addHistory, getHistory } from '@/app/auth/actions';
+import { type AtcScoreResult, getAtcScore, addHistory, getHistory } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
