@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { UploadForm } from '@/components/gau-gyan/upload-form';
 import { Scorecard } from '@/components/gau-gyan/scorecard';
-import { type AtcScoreResult, getAtcScore } from '@/app/actions';
+import { type AtcScoreResult, getAtcScore, addHistory, getHistory } from '@/app/auth/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,7 +13,7 @@ import { AlertTriangle, Info } from 'lucide-react';
 import { HistoryCard } from '@/components/gau-gyan/history-card';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { app } from '@/lib/firebase';
-import { addHistory, getHistory } from './auth/actions';
+
 
 export type HistoryItem = AtcScoreResult & {
   id: string;

@@ -2,7 +2,7 @@
 import { initializeApp, getApps, getApp, App } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import * as admin from 'firebase/admin';
+import * as admin from 'firebase-admin';
 
 // CLIENT-SIDE CONFIG
 const firebaseConfig = {
@@ -18,17 +18,21 @@ const app: App = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// SERVER-SIDE/ADMIN CONFIG
-const serviceAccount: admin.ServiceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-};
+// SERVER-SIDE/ADMIN CONFIG - MOVED TO actions.ts to avoid client-side bundling issues.
+let adminApp: admin.app.App;
 
-const adminApp: admin.app.App = !admin.apps.length
-  ? admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    })
-  : admin.app();
+if (!admin.apps.length) {
+    const serviceAccount: admin.ServiceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    };
+    adminApp = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
+} else {
+    adminApp = admin.app();
+}
+
 
 export { app, auth, db, adminApp, firebaseConfig };
