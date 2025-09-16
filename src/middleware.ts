@@ -2,22 +2,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// This middleware is currently not performing any checks and just passes the request through.
+// You can add logic here to protect routes or perform other checks.
 export async function middleware(request: NextRequest) {
-  const session = request.cookies.get('session');
-  const { pathname } = request.nextUrl;
-
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
-
-  // If there's a session cookie, and the user is on an auth page, redirect to home.
-  if (session && isAuthPage) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  // If there's no session cookie, and the user is not on an auth page or the home page, redirect to login.
-  if (!session && !isAuthPage && pathname !== '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
   return NextResponse.next();
 }
 
