@@ -23,6 +23,7 @@ const AutomateATCScoreGenerationInputSchema = z.object({
     .describe(
       "A photo of a the animal, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  language: z.enum(['en', 'mr']).describe('The language for the output.'),
 });
 export type AutomateATCScoreGenerationInput = z.infer<typeof AutomateATCScoreGenerationInputSchema>;
 
@@ -47,6 +48,8 @@ const atcScorePrompt = ai.definePrompt({
   output: {schema: AutomateATCScoreGenerationOutputSchema},
   model: 'googleai/gemini-2.5-flash',
   prompt: `You are an AI assistant specialized in evaluating animal body structures for dairy farming. You are part of the Rashtriya Gokul Mission. Given the following measurements and characteristics of a cattle or buffalo, generate an ATC (Animal Type Classification) score and list salient traits.
+
+  Your response must be in the following language: {{language}}.
 
   Body Length: {{bodyLength}} cm
   Chest Width: {{chestWidth}} cm

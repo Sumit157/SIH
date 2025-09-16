@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 export default function Home() {
   const [result, setResult] = useState<AtcScoreResult | null>(null);
@@ -17,6 +18,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { language, translations } = useLanguage();
 
 
   const handleAnalyze = async (imageDataUri: string) => {
@@ -24,18 +26,18 @@ export default function Home() {
     setResult(null);
     setError(null);
     try {
-      const analysisResult = await getAtcScore(imageDataUri);
+      const analysisResult = await getAtcScore(imageDataUri, language);
       if (!analysisResult.atcScore || !analysisResult.bodyLength) {
-        throw new Error('Analysis failed to return complete data.');
+        throw new Error(translations.errors.analysisFailed);
       }
       setResult(analysisResult);
     } catch (e) {
       console.error(e);
-      const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
+      const errorMessage = e instanceof Error ? e.message : translations.errors.unknownError;
       setError(errorMessage);
       toast({
         variant: 'destructive',
-        title: 'Analysis Failed',
+        title: translations.toasts.analysisFailed.title,
         description: errorMessage,
       });
     } finally {
@@ -77,9 +79,9 @@ export default function Home() {
             <CardContent className="p-6 text-center">
                <Alert variant="destructive">
                  <AlertTriangle className="h-4 w-4" />
-                 <AlertTitle>Analysis Error</AlertTitle>
+                 <AlertTitle>{translations.analysisError.title}</AlertTitle>
                  <AlertDescription>
-                   {error} Please try again.
+                   {error} {translations.analysisError.retry}
                  </AlertDescription>
                </Alert>
              </CardContent>
@@ -94,8 +96,8 @@ export default function Home() {
     return (
        <Card className="flex items-center justify-center h-full min-h-[400px] border-dashed">
          <CardContent className="p-6 text-center text-muted-foreground">
-           <p className="text-lg font-medium">Results will be displayed here</p>
-           <p>Upload an image to start the analysis.</p>
+           <p className="text-lg font-medium">{translations.results.placeholder.title}</p>
+           <p>{translations.results.placeholder.description}</p>
          </CardContent>
        </Card>
     );

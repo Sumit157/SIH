@@ -17,6 +17,7 @@ const ExtractAnimalTraitsFromImageInputSchema = z.object({
     .describe(
       'A photo of an animal, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.' // prettier-ignore
     ),
+  language: z.enum(['en', 'mr']).describe('The language for the output.'),
 });
 export type ExtractAnimalTraitsFromImageInput = z.infer<
   typeof ExtractAnimalTraitsFromImageInputSchema
@@ -51,6 +52,8 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert in animal husbandry, with a deep understanding of animal anatomy and trait measurement.
 
 You will use the provided image to identify and measure key body parameters of the animal.
+
+Your response for 'udderShape', 'breed', and 'breedingSuitability' must be in the following language: {{language}}.
 
 Analyze the animal in the photo and extract the following traits:
 - Body Length (cm)

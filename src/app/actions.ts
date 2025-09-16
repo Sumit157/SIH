@@ -15,10 +15,12 @@ import {
 export type AtcScoreResult = ExtractAnimalTraitsFromImageOutput & AutomateATCScoreGenerationOutput;
 
 export async function getAtcScore(
-  imageDataUri: string
+  imageDataUri: string,
+  language: 'en' | 'mr'
 ): Promise<AtcScoreResult> {
     const extractedTraits = await extractAnimalTraitsFromImage({
       photoDataUri: imageDataUri,
+      language,
     });
 
     const atcScore = await automateATCScoreGeneration({
@@ -28,6 +30,7 @@ export async function getAtcScore(
       rumpAngle: extractedTraits.rumpAngle,
       udderShape: extractedTraits.udderShape,
       image: imageDataUri,
+      language,
     });
 
     const result = {

@@ -3,6 +3,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import AppHeader from '@/components/layout/app-header';
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: 'Gau Gyan - AI Animal Classification',
@@ -25,7 +26,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -34,9 +35,11 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        <AppHeader />
-        <main>{children}</main>
-        <Toaster />
+        <LanguageProvider>
+          <AppHeader />
+          <main>{children}</main>
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -1,0 +1,58 @@
+
+{
+  "appTitle": "गो ज्ञान",
+  "upload": {
+    "title": "प्राण्याची प्रतिमा अपलोड करा",
+    "description": "विश्लेषणासाठी गुरे किंवा म्हशीची प्रतिमा कॅप्चर करा किंवा अपलोड करा.",
+    "analyzedImageTitle": "विश्लेषित प्रतिमा",
+    "analyzeAnotherButton": "दुसरी प्रतिमा विश्लेषित करा",
+    "changeImageButton": "प्रतिमा बदला",
+    "analyzeButton": "विश्लेषण करा",
+    "dropzoneIdle": "प्रतिमा ड्रॅग आणि ड्रॉप करा, किंवा निवडण्यासाठी क्लिक करा",
+    "dropzoneActive": "प्रतिमा येथे सोडा..."
+  },
+  "results": {
+    "placeholder": {
+      "title": "निकाल येथे प्रदर्शित केले जातील",
+      "description": "विश्लेषण सुरू करण्यासाठी एक प्रतिमा अपलोड करा."
+    }
+  },
+  "scorecard": {
+    "title": "विश्लेषण निकाल",
+    "description": "एटीसी स्कोर आणि काढलेले गुणधर्म.",
+    "downloadButton": "अहवाल डाउनलोड करा",
+    "reportTitle": "विश्लेषण अहवाल",
+    "animalImage": "प्राण्याची प्रतिमा",
+    "overallScore": "एकूण स्कोर",
+    "salientTraits": "मुख्य गुणधर्म",
+    "breed": "जात",
+    "breedingSuitability": "प्रजननासाठी योग्यता",
+    "extractedTraits": "काढलेले गुणधर्म",
+    "measurements": "मापे",
+    "angle": "कोन",
+    "atc": {
+      "title": "ॲनिमल टाईप क्लासिफिकेशन (एटीसी)",
+      "description": "हा स्कोर प्रमाणित शारीरिक संरचना मूल्यांकनावर आधारित एकूण गुणवत्ता दर्शवतो."
+    }
+  },
+  "traitLabels": {
+    "bodyLength": "शरीराची लांबी",
+    "chestWidth": "छातीची रुंदी",
+    "heightAtWithers": "खांद्यावरील उंची",
+    "rumpAngle": "कमरेचा कोन",
+    "udderShape": "कासचा आकार"
+  },
+  "analysisError": {
+    "title": "विश्लेषण त्रुटी",
+    "retry": "कृपया पुन्हा प्रयत्न करा."
+  },
+  "toasts": {
+    "analysisFailed": {
+      "title": "विश्लेषण अयशस्वी"
+    }
+  },
+  "errors": {
+    "analysisFailed": "विश्लेषण पूर्ण डेटा परत करण्यात अयशस्वी झाले.",
+    "unknownError": "एक अज्ञात त्रुटी आली."
+  }
+}

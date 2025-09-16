@@ -1,12 +1,14 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
+import { useLanguage } from '@/context/language-context';
 
 interface ScoreDisplayProps {
   score: number;
 }
 
 export function ScoreDisplay({ score }: ScoreDisplayProps) {
+  const { translations } = useLanguage();
   const getScoreColor = () => {
     if (score >= 80) return 'bg-green-500';
     if (score >= 60) return 'bg-yellow-500';
@@ -47,8 +49,8 @@ export function ScoreDisplay({ score }: ScoreDisplayProps) {
             </div>
         </div>
         <div className="flex-1">
-            <h4 className="font-semibold text-lg">Animal Type Classification (ATC)</h4>
-            <p className="text-sm text-muted-foreground">This score represents the overall quality based on standardized body structure evaluation.</p>
+            <h4 className="font-semibold text-lg">{translations.scorecard.atc.title}</h4>
+            <p className="text-sm text-muted-foreground">{translations.scorecard.atc.description}</p>
         </div>
       </CardContent>
     </Card>

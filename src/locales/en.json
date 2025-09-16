@@ -1,0 +1,58 @@
+
+{
+  "appTitle": "Gau Gyan",
+  "upload": {
+    "title": "Upload Animal Image",
+    "description": "Capture or upload an image of cattle or buffalo for analysis.",
+    "analyzedImageTitle": "Analyzed Image",
+    "analyzeAnotherButton": "Analyze Another Image",
+    "changeImageButton": "Change Image",
+    "analyzeButton": "Analyze",
+    "dropzoneIdle": "Drag & drop an image, or click to select",
+    "dropzoneActive": "Drop the image here..."
+  },
+  "results": {
+    "placeholder": {
+      "title": "Results will be displayed here",
+      "description": "Upload an image to start the analysis."
+    }
+  },
+  "scorecard": {
+    "title": "Analysis Results",
+    "description": "ATC Score and extracted traits.",
+    "downloadButton": "Download Report",
+    "reportTitle": "Analysis Report",
+    "animalImage": "Animal Image",
+    "overallScore": "Overall Score",
+    "salientTraits": "Salient Traits",
+    "breed": "Breed",
+    "breedingSuitability": "Breeding Suitability",
+    "extractedTraits": "Extracted Traits",
+    "measurements": "Measurements",
+    "angle": "Angle",
+    "atc": {
+      "title": "Animal Type Classification (ATC)",
+      "description": "This score represents the overall quality based on standardized body structure evaluation."
+    }
+  },
+  "traitLabels": {
+    "bodyLength": "Body Length",
+    "chestWidth": "Chest Width",
+    "heightAtWithers": "Height at Withers",
+    "rumpAngle": "Rump Angle",
+    "udderShape": "Udder Shape"
+  },
+  "analysisError": {
+    "title": "Analysis Error",
+    "retry": "Please try again."
+  },
+  "toasts": {
+    "analysisFailed": {
+      "title": "Analysis Failed"
+    }
+  },
+  "errors": {
+    "analysisFailed": "Analysis failed to return complete data.",
+    "unknownError": "An unknown error occurred."
+  }
+}
